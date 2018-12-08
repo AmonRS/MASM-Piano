@@ -184,6 +184,59 @@ WinProc PROC,
 		jmp WinProcExit
 	.ENDIF
 
+	; GET KEYBOARD INPUT HERE
+	.IF eax == WM_KEYDOWN
+		.IF wParam == 41h		;key a = c note
+	
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 57h		;key w = c#
+		
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 53h		;key s = d
+	
+		jmp WinProcExit
+		.ENDIF
+		.IF wParam == 45h		;key e = d#
+			
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 44h		;key d = e
+			
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 46h		;key f = f
+			
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 54h		;key t = f#
+			
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 47h		;key g = g
+			
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 59h		;key y = g#
+		
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 48h		;key h = a
+		
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 55h		;key u = a#
+			
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 4Ah		;key j = b
+		
+	  	jmp WinProcExit
+		.ENDIF
+
+	.ENDIF
+
 WinProcExit:
 	ret
 WinProc ENDP
