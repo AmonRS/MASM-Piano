@@ -131,8 +131,8 @@ main PROC
 	.ENDIF
 
 ; Display a greeting message.
-	INVOKE MessageBox, hMainWnd, ADDR GreetText,
-	  ADDR GreetTitle, MB_OK
+	; INVOKE MessageBox, hMainWnd, ADDR GreetText,
+	;   ADDR GreetTitle, MB_OK
 
 ; Setup a timer
 	INVOKE SetTimer, hMainWnd, 0, 30, 0
@@ -340,9 +340,7 @@ WinProc PROC,
 	.ENDIF
 
 	.IF eax == WM_CLOSE		; close window?
-	  	INVOKE MessageBox, hWnd, ADDR CloseMsg,
-	    	ADDR WindowName, MB_OK
-	  	INVOKE PostQuitMessage,0
+	  	; dont do anything
 	  	jmp WinProcExit
 	.ELSEIF eax == WM_TIMER     ; did a timer fire?
 	  	INVOKE InvalidateRect, hWnd, 0, 1
@@ -358,7 +356,7 @@ WinProc PROC,
 		; DRAW THE PIANO KEYS (rectangles) -------------------------------------------------------------------------------------------------------------------------
 		
 			; CHANGE BRUSH COLOR TO WHITE
-			; Create an RGB value in ebx  32 BITS: { BLANK, BLUE, GREEN,  RED }; each of the four values is one byte; The RGB value is needed to set the color of the brush
+			; Create an RGB value in ebx  32 BITS: { BLANK, BLUE, GREEN,  RED }; values are one byte; needed to set the color of the brush
 			xor ebx, ebx  					; Clear out ebx								; ebx = { 0, 0, 0,  0 }
 			mov bl, 255						;150   ; This will be the blue color		; ebx = { 0, 0, 0, 150 }
 			shl ebx, 8    					; Make room in ebx to add the green			; ebx = { 0, 0, 150, 0 }
@@ -460,15 +458,10 @@ WinProc PROC,
 				INVOKE Rectangle, hdc, 875, 290, 925, 300
 			.ENDIF
 
-
-
 		mov eax, 50
 		call Delay
 
-	  	; ; output text
-	  	; INVOKE DrawTextA, hdc, ADDR HelloStr, -1, ADDR rc, DTFLAGS 
-	  	; INVOKE EndPaint, hWnd, ADDR ps
-	  	; jmp WinProcExit
+	  	jmp WinProcExit
 	.ELSE		; other message?
 	  	INVOKE DefWindowProc, hWnd, localMsg, wParam, lParam
 	  	jmp WinProcExit
@@ -480,9 +473,9 @@ WinProc ENDP
 
 
 
-
+;--------------------------------------------------------------------------------
 PlayNote PROC fname:DWORD
-	; 
+; 
 	mov eax, SND_FILENAME
 	or eax, SND_ASYNC
 	invoke PlaySound, fname, 0, eax
