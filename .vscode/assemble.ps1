@@ -26,7 +26,7 @@ $command = ") "
 write-output $command | out-file -encoding ascii -append $batfile 
 $command = '%InstallDir%/VC/Auxiliary/Build/vcvarsall.bat x86' 
 write-output $command | out-file -encoding ascii -append $batfile 
-$command = "ml.exe /nologo /Zi /Zd /I C:\Irvine /Fe " + $exefile + " /W3 /errorReport:prompt /Ta " + $assemblerfiles + ' /link /ENTRY:"main" /SUBSYSTEM:CONSOLE /LARGEADDRESSAWARE:NO C:/Irvine/Lib32/Irvine32.lib kernel32.lib user32.lib gdi32.lib'
+$command = "ml.exe /nologo /Zi /Zd /I C:\Irvine /Fe " + $exefile + " /W3 /errorReport:prompt /Ta " + $assemblerfiles + ' /link /ENTRY:"main" /SUBSYSTEM:CONSOLE /LARGEADDRESSAWARE:NO C:/Irvine/Lib32/Irvine32.lib kernel32.lib user32.lib gdi32.lib "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17134.0\um\x86\Winmm.lib"'
 write-output $command | out-file -encoding ascii -append $batfile 
 type $batfile | CMD
 $ofiles = (get-item *.obj)

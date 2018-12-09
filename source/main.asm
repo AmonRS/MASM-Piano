@@ -10,6 +10,8 @@ TITLE MASM Piano
 
 INCLUDE Irvine32.inc
 INCLUDE GraphWin.inc
+INCLUDELIB winmm.lib
+
 
 DTFLAGS = 25h  ; Needed for drawtext
 
@@ -38,6 +40,23 @@ DTFLAGS = 25h  ; Needed for drawtext
 	ErrorTitle  BYTE "Error",0
 	WindowName  BYTE "ASM Windows App",0
 	className   BYTE "ASMWin",0
+
+	c3 BYTE "C:\Users\atran19\MASM-Piano\source\C3.wav",0
+	cs3 BYTE "C:\Users\atran19\MASM-Piano\source\Cs3.wav",0
+	d3 BYTE "C:\Users\atran19\MASM-Piano\source\D3.wav",0
+	ds3 BYTE "C:\Users\atran19\MASM-Piano\source\Ds3.wav",0
+	e3 BYTE "C:\Users\atran19\MASM-Piano\source\E3.wav",0
+	f3 BYTE "C:\Users\atran19\MASM-Piano\source\F3.wav",0
+	fs3 BYTE "C:\Users\atran19\MASM-Piano\source\Fs3.wav",0
+	g3 BYTE "C:\Users\atran19\MASM-Piano\source\G3.wav",0
+	gs3 BYTE "C:\Users\atran19\MASM-Piano\source\Gs3.wav",0
+	a3 BYTE "C:\Users\atran19\MASM-Piano\source\A3.wav",0
+	as3 BYTE "C:\Users\atran19\MASM-Piano\source\As3.wav",0
+	b3 BYTE "C:\Users\atran19\MASM-Piano\source\B3.wav",0
+
+	SND_FILENAME DWORD 00020000h
+	SND_ASYNC DWORD 1
+	
 
 	; Define the Application's Window class structure.
 	MainWin WNDCLASS <NULL,WinProc,NULL,NULL,NULL,NULL,NULL, \
@@ -125,20 +144,98 @@ WinProc PROC,
 	LOCAL hBrush:DWORD  ; Hold a brush for drawing a filled rectangle
 	
 	mov eax, localMsg
+; GET KEYBOARD INPUT HERE
+	.IF eax == WM_KEYDOWN
+		call WriteInt
+		.IF wParam == 41h		;key a = c note
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET c3, 0, eax
+	
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 57h		;key w = c#
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET cs3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 53h		;key s = d
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET d3, 0, eax
+		jmp WinProcExit
+		.ENDIF
+		.IF wParam == 45h		;key e = d#
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET ds3, 0, eax	
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 44h		;key d = e
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET e3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 46h		;key f = f
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET f3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 54h		;key t = f#
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET fs3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 47h		;key g = g
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET g3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 59h		;key y = g#
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET gs3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 48h		;key h = a
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET a3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 55h		;key u = a#
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET as3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+		.IF wParam == 4Ah		;key j = b
+			mov eax, SND_FILENAME
+			or eax, SND_ASYNC
+			invoke PlaySound, OFFSET b3, 0, eax
+	  	jmp WinProcExit
+		.ENDIF
+
+	.ENDIF
 
 	.IF eax == WM_LBUTTONDOWN		; left mouse button?
-	  	INVOKE MessageBox, hWnd, ADDR LeftPopupText,
-	    	ADDR LeftPopupTitle, MB_OK
-	  	jmp WinProcExit
+	  	; INVOKE MessageBox, hWnd, ADDR LeftPopupText,
+	    ; 	ADDR LeftPopupTitle, MB_OK
+	  	; jmp WinProcExit
 	.ELSEIF eax == WM_CREATE		; create window?
-	  	INVOKE MessageBox, hWnd, ADDR AppLoadMsgText,
-	    	ADDR AppLoadMsgTitle, MB_OK
-	  	jmp WinProcExit
+	  	; INVOKE MessageBox, hWnd, ADDR AppLoadMsgText,
+	    ; 	ADDR AppLoadMsgTitle, MB_OK
+	  	; jmp WinProcExit
 	.ELSEIF eax == WM_CLOSE		; close window?
-		INVOKE MessageBox, hWnd, ADDR CloseMsg,
-			ADDR WindowName, MB_OK
-		INVOKE PostQuitMessage,0
-	  jmp WinProcExit
+	; 	INVOKE MessageBox, hWnd, ADDR CloseMsg,
+	; 		ADDR WindowName, MB_OK
+	; 	INVOKE PostQuitMessage,0
+	;   jmp WinProcExit
 	.ELSEIF eax == WM_PAINT		; window needs redrawing? 
 		INVOKE BeginPaint, hWnd, ADDR ps 
 		mov hdc, eax
@@ -184,66 +281,20 @@ WinProc PROC,
 		jmp WinProcExit
 	.ENDIF
 
-	; GET KEYBOARD INPUT HERE
-	.IF eax == WM_KEYDOWN
-		.IF wParam == 41h		;key a = c note
 	
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 57h		;key w = c#
-		
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 53h		;key s = d
-	
-		jmp WinProcExit
-		.ENDIF
-		.IF wParam == 45h		;key e = d#
-			
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 44h		;key d = e
-			
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 46h		;key f = f
-			
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 54h		;key t = f#
-			
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 47h		;key g = g
-			
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 59h		;key y = g#
-		
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 48h		;key h = a
-		
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 55h		;key u = a#
-			
-	  	jmp WinProcExit
-		.ENDIF
-		.IF wParam == 4Ah		;key j = b
-		
-	  	jmp WinProcExit
-		.ENDIF
-
-	.ENDIF
-
 WinProcExit:
 	ret
 WinProc ENDP
 
+; PlayNote PROC 
 
+; 	mov eax, SND_FILENAME
+; 	or eax, SND_ASYNC
+; 	invoke PlaySound, OFFSET fname, 0, eax
 
+; 	ret 
 
+; PlayNote ENDP
 
 ;---------------------------------------------------
 ErrorHandler PROC

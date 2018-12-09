@@ -54,6 +54,12 @@ PAINTSTRUCT STRUCT
 PAINTSTRUCT ENDS
 
 ;-------------- Function Prototypes ------------------------
+
+PlaySound PROTO,
+	pszSound: PTR BYTE,
+	hmod: DWORD,
+	fdwSound: DWORD 
+
 BeginPaint PROTO,       ; Begin Painting in a window
     hWnd:DWORD,
     lpPaintStruct:DWORD
