@@ -206,6 +206,7 @@ WM_CREATE           =  01h		; create window
 WM_LBUTTONDOWN      =  0201h		; left mouse button down
 WM_PAINT            =  000Fh       ; paint message
 WM_KEYDOWN			=  0100h	 ;character code when key is pressed
+WM_KEYUP			=  0101h	 ; key press ended
 
 COMMENT @
 MB_ICONERROR           =  010h	; stop sign icon
