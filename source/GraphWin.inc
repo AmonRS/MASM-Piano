@@ -127,6 +127,11 @@ GetWindowRect PROTO,	; get the current window's rectangle
 	hWind:DWORD,
 	pRect:PTR RECT	
 
+InvalidateRect PROTO, ; Invalidate the windows rectangle
+	hWnd:DWORD,
+	pRect:PTR RECT,
+	bErase:DWORD
+
 LineTo PROTO,      ; Draw a line from the current location to x,y
 	hdc:DWORD, 
 	x:DWORD,
@@ -152,6 +157,12 @@ PostQuitMessage PROTO,	; tell Windows to terminate the app
 RegisterClassA PROTO,	; register a new window class
 	pWndClass:PTR WNDCLASS
 
+SetTimer PROTO,  ; Start a windows timer
+    hWnd:DWORD, 
+	nIDEvent:DWORD,
+	uElapse:DWORD,
+	lpTimerFunc:DWORD
+
 ShowWindow PROTO,	; show a window
 	hWnd:DWORD,
 	showState:DWORD
@@ -163,7 +174,7 @@ UpdateWindow PROTO,	; draw(redraw) a window
 SelectObject PROTO,	; GDI32.LIB
 	hdc:DWORD,
 	hGDIobject:DWORD
-	
+
 DeleteObject PROTO,	; GDI32.LIB
 	hGDIobject:DWORD
 
@@ -207,6 +218,8 @@ WM_LBUTTONDOWN      =  0201h		; left mouse button down
 WM_PAINT            =  000Fh       ; paint message
 WM_KEYDOWN			=  0100h	 ;character code when key is pressed
 WM_KEYUP			=  0101h	 ; key press ended
+WM_TIMER            =  0113h    ; timer fires
+
 
 COMMENT @
 MB_ICONERROR           =  010h	; stop sign icon

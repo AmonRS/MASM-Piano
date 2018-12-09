@@ -1,10 +1,11 @@
 TITLE MASM Piano
 
 ; Amon Ratna Sthapit , Anna Tran
-
 ; A virtual piano that you can play with the keyboard.
 
 ; keyboard key codes : https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
+
+
 
 INCLUDE Irvine32.inc
 INCLUDE GraphWin.inc
@@ -18,24 +19,34 @@ DTFLAGS = 25h  ; Needed for drawtext
 
 	AppLoadMsgTitle BYTE "Application Loaded",0
 	AppLoadMsgText  BYTE "This window displays when the WM_CREATE "
-					BYTE "message is received",0
+								BYTE "message is received",0
 
-	LeftPopupTitle	BYTE "Left Mouse Button Popup Window",0
-	LeftPopupText	BYTE "This window was activated by a "
+	PopupTitle BYTE "Popup Window",0
+	PopupText  BYTE "This window was activated by a "
 					BYTE "WM_LBUTTONDOWN message",0
 
 	GreetTitle BYTE "Main Window Active",0
 	GreetText  BYTE "This window is shown immediately after "
-			BYTE "CreateWindow and UpdateWindow are called.",0
+					BYTE "CreateWindow and UpdateWindow are called.",0
 
 	CloseMsg   BYTE "WM_CLOSE message received",0
-	str1   BYTE "Paint Message Received",0
+	leftleft BYTE "left <.<",0
+	rightright BYTE "right >.>",0
+
+	HelloStr   BYTE "Hello World",0
 	rc RECT <0,0,200,200>
 	ps PAINTSTRUCT <?>
 	hdc DWORD ?
+
 	ErrorTitle  BYTE "Error",0
 	WindowName  BYTE "ASM Windows App",0
 	className   BYTE "ASMWin",0
+
+	msg	     MSGStruct <>
+	winRect   RECT <>
+	hMainWnd  DWORD ?
+	hInstance DWORD ?
+
 
 	; FILE PATHS FOR SOUND FILES
 		;SFPATH TEXTEQU <"C:\Users\atran19\MASM-Piano\source\">
@@ -74,18 +85,12 @@ DTFLAGS = 25h  ; Needed for drawtext
 
 	SND_FILENAME DWORD 00020000h
 	SND_ASYNC DWORD 1
-	
+
+
 
 	; Define the Application's Window class structure.
 	MainWin WNDCLASS <NULL,WinProc,NULL,NULL,NULL,NULL,NULL, \
 		COLOR_WINDOW,NULL,className>
-
-	msg	     MSGStruct <>
-	winRect   RECT <>
-	hMainWnd  DWORD ?
-	hInstance DWORD ?
-
-
 
 
 
@@ -106,40 +111,45 @@ main PROC
 ; Register the window class.
 	INVOKE RegisterClass, ADDR MainWin
 	.IF eax == 0
-		call ErrorHandler
-		jmp Exit_Program
+	  call ErrorHandler
+	  jmp Exit_Program
 	.ENDIF
 
 ; Create the application's main window.
 ; Returns a handle to the main window in EAX.
 	INVOKE CreateWindowEx, 0, ADDR className,
-	  	ADDR WindowName,MAIN_WINDOW_STYLE,
-	  	CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,
-		CW_USEDEFAULT,NULL,NULL,hInstance,NULL
+	  ADDR WindowName,MAIN_WINDOW_STYLE,
+	  CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,
+	  CW_USEDEFAULT,NULL,NULL,hInstance,NULL
 	mov hMainWnd,eax
 
 ; If CreateWindowEx failed, display a message & exit.
 	.IF eax == 0
-	  	call ErrorHandler
-	  	jmp  Exit_Program
+	  call ErrorHandler
+	  jmp  Exit_Program
 	.ENDIF
+
+; Display a greeting message.
+	INVOKE MessageBox, hMainWnd, ADDR GreetText,
+	  ADDR GreetTitle, MB_OK
+
+; Setup a timer
+	INVOKE SetTimer, hMainWnd, 0, 30, 0
 
 ; Show and draw the window.
 	INVOKE ShowWindow, hMainWnd, SW_SHOW
 	INVOKE UpdateWindow, hMainWnd
-
-; Display a greeting message.
-	INVOKE MessageBox, hMainWnd, ADDR GreetText,
-	  	ADDR GreetTitle, MB_OK
 
 ; Begin the program's message-handling loop.
 Message_Loop:
 	; Get next message from the queue.
 	INVOKE GetMessage, ADDR msg, NULL,NULL,NULL
 
+	; GET KEYBOARD INPUT HERE ?
+
 	; Quit if no more messages.
 	.IF eax == 0
-	  	jmp Exit_Program
+	  jmp Exit_Program
 	.ENDIF
 
 	; Relay the message to the program's WinProc.
@@ -153,102 +163,131 @@ main ENDP
 ;-----------------------------------------------------
 WinProc PROC,
 	hWnd:DWORD, localMsg:DWORD, wParam:DWORD, lParam:DWORD
-	; The application's message handler, which handles
-	; application-specific messages. All other messages
-	; are forwarded to the default Windows message
-	; handler.
-	;-----------------------------------------------------
-
+; The application's message handler, which handles
+; application-specific messages. All other messages
+; are forwarded to the default Windows message
+; handler.
+;-----------------------------------------------------
 	LOCAL hBrush:DWORD  ; Hold a brush for drawing a filled rectangle
-	
 	mov eax, localMsg
+	
+	.IF eax == WM_LBUTTONDOWN		; mouse button?
+		;   INVOKE MessageBox, hWnd, ADDR PopupText,
+		;     ADDR PopupTitle, MB_OK
+		;   jmp WinProcExit
+	.ENDIF
 	; GET KEYBOARD INPUT HERE
 	.IF eax == WM_KEYDOWN
 		mov ebx, 1
 		.IF wParam == 41h		;key a = c note
-			push OFFSET c3
-			call PlayNote
+			mov eax, ebx
+			.IF c3_keystat == 0
+				push OFFSET c3
+				call PlayNote
+			.ENDIF
 			mov c3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 57h		;key w = c# note
-			push OFFSET cs3
-			call PlayNote
+			.IF cs3_keystat == 0
+				push OFFSET cs3
+				call PlayNote
+			.ENDIF
 			mov cs3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 53h		;key s = d note
-			push OFFSET d3
-			call PlayNote
+			.IF d3_keystat == 0
+				push OFFSET d3
+				call PlayNote
+			.ENDIF
 			mov d3_keystat, bl
 		jmp WinProcExit
 		.ENDIF
 		.IF wParam == 45h		;key e = d# note
-			push OFFSET ds3
-			call PlayNote
+			.IF ds3_keystat == 0
+				push OFFSET ds3
+				call PlayNote
+			.ENDIF
 			mov ds3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 44h		;key d = e note
-			push OFFSET e3
-			call PlayNote
+			.IF e3_keystat == 0
+				push OFFSET e3
+				call PlayNote
+			.ENDIF
 			mov e3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 46h		;key f = f note
-			push OFFSET f3
-			call PlayNote
+			.IF f3_keystat == 0
+				push OFFSET f3
+				call PlayNote
+			.ENDIF
 			mov f3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 54h		;key t = f# note
-			push OFFSET fs3
-			call PlayNote
+			.IF fs3_keystat == 0
+				push OFFSET fs3
+				call PlayNote
+			.ENDIF
 			mov fs3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 47h		;key g = g note
-			push OFFSET g3
-			call PlayNote
+			.IF g3_keystat == 0
+				push OFFSET g3
+				call PlayNote
+			.ENDIF
 			mov g3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 59h		;key y = g# note
-			push OFFSET gs3
-			call PlayNote
+			.IF gs3_keystat == 0
+				push OFFSET gs3
+				call PlayNote
+			.ENDIF
 			mov gs3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 48h		;key h = a note
-			push OFFSET a3
-			call PlayNote
+			.IF a3_keystat == 0
+				push OFFSET a3
+				call PlayNote
+			.ENDIF
 			mov a3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 55h		;key u = a# note
-			push OFFSET as3
-			call PlayNote
+			.IF as3_keystat == 0
+				push OFFSET as3
+				call PlayNote
+			.ENDIF
 			mov as3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 4Ah		;key j = b note
-			push OFFSET b3
-			call PlayNote
+			.IF b3_keystat == 0
+				push OFFSET b3
+				call PlayNote
+			.ENDIF
 			mov b3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 		.IF wParam == 4Bh		;key k = c4 note
-			push OFFSET c4
-			call PlayNote
+			.IF c4_keystat == 0
+				push OFFSET c4
+				call PlayNote
+			.ENDIF
 			mov c4_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
 	.ENDIF
-
 	.IF eax == WM_KEYUP
 		mov ebx, 0
 		.IF wParam == 41h		;key a = c note
-			call writeInt
 			mov c3_keystat, bl
 	  	jmp WinProcExit
 		.ENDIF
@@ -302,24 +341,22 @@ WinProc PROC,
 		.ENDIF
 	.ENDIF
 
-	.IF eax == WM_LBUTTONDOWN		; left mouse button?
-	  	INVOKE MessageBox, hWnd, ADDR LeftPopupText,
-	    	ADDR LeftPopupTitle, MB_OK
+	.IF eax == WM_CLOSE		; close window?
+	  	INVOKE MessageBox, hWnd, ADDR CloseMsg,
+	    	ADDR WindowName, MB_OK
+	  	INVOKE PostQuitMessage,0
 	  	jmp WinProcExit
-	.ELSEIF eax == WM_CREATE		; create window?
-	  	; INVOKE MessageBox, hWnd, ADDR AppLoadMsgText,
-	    ; 	ADDR AppLoadMsgTitle, MB_OK
-	  	; jmp WinProcExit
-	.ELSEIF eax == WM_CLOSE		; close window?
-	; 	INVOKE MessageBox, hWnd, ADDR CloseMsg,
-	; 		ADDR WindowName, MB_OK
-	; 	INVOKE PostQuitMessage,0
-	;   jmp WinProcExit
+	.ELSEIF eax == WM_TIMER     ; did a timer fire?
+	  	INVOKE InvalidateRect, hWnd, 0, 1
+	  	jmp WinProcExit
 	.ENDIF
+
+
 	.IF eax == WM_PAINT		; window needs redrawing? 
-		INVOKE BeginPaint, hWnd, ADDR ps 
-		mov hdc, eax
-	  
+		call writeInt
+		INVOKE BeginPaint, hWnd, ADDR ps  
+	  	mov hdc, eax
+
 		; DRAW THE PIANO KEYS (rectangles) -----------------------------------------------------------------------------------------------------------
 		
 		; Create an RGB value in ebx  32 BITS: { BLANK, BLUE, GREEN,  RED }; each of the four values is one byte; The RGB value is needed to set the color of the brush
@@ -334,15 +371,50 @@ WinProc PROC,
 		INVOKE SelectObject, hdc, hBrush
 		
 		; DRAW WHITE KEYS
-		INVOKE Rectangle, hdc, 300, 100, 400, 425 		;c
-		INVOKE Rectangle, hdc, 300, 425, 400, 450
+		INVOKE Rectangle, hdc, 300, 100, 400, 450 		;c
+		.IF c3_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 300, 425, 400, 450
+		.ENDIF
+
 		INVOKE Rectangle, hdc, 400, 100, 500, 450 		;d
+		.IF d3_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 400, 425, 500, 450
+		.ENDIF
+
 		INVOKE Rectangle, hdc, 500, 100, 600, 450 		;e
+		.IF e3_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 500, 425, 600, 450
+		.ENDIF
+
 		INVOKE Rectangle, hdc, 600, 100, 700, 450 		;f
+		.IF f3_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 600, 425, 700, 450
+		.ENDIF
+
 		INVOKE Rectangle, hdc, 700, 100, 800, 450 		;g
+		.IF g3_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 700, 425, 800, 450
+		.ENDIF
 		INVOKE Rectangle, hdc, 800, 100, 900, 450 		;a
+		.IF a3_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 800, 425, 900, 450
+		.ENDIF
 		INVOKE Rectangle, hdc, 900, 100, 1000, 450 		;b
+		.IF b3_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 900, 425, 1000, 450
+		.ENDIF
 		INVOKE Rectangle, hdc, 1000, 100, 1100, 450 	;c4
+		.IF c4_keystat == 0
+			call writeInt
+			INVOKE Rectangle, hdc, 1000, 425, 1100, 450
+		.ENDIF
 
 		xor ebx, ebx  			; Clear ebx
 		mov bl, 50				; blue color
@@ -360,31 +432,25 @@ WinProc PROC,
 		INVOKE Rectangle, hdc, 675, 100, 725, 300 		;f#
 		INVOKE Rectangle, hdc, 775, 100, 825, 300 		;g#
 		INVOKE Rectangle, hdc, 875, 100, 925, 300 		;a#
-		
-		
-		; INVOKE MoveToEx, hdc, 0, 0, 0
-		; INVOKE LineTo, hdc, 200, 200
-		; INVOKE LineTo, hdc, 200, 0
-		; INVOKE LineTo, hdc, 0,   200
-		; INVOKE LineTo, hdc, 0,   0
-		; INVOKE DrawTextA, hdc, ADDR str1, -1, ADDR rc, DTFLAGS 
-		; INVOKE EndPaint, hWnd, ADDR ps
-		jmp WinProcExit
+
+	  	; ; output text
+	  	; INVOKE DrawTextA, hdc, ADDR HelloStr, -1, ADDR rc, DTFLAGS 
+	  	; INVOKE EndPaint, hWnd, ADDR ps
+	  	; jmp WinProcExit
 	.ELSE		; other message?
-		INVOKE DefWindowProc, hWnd, localMsg, wParam, lParam
-		jmp WinProcExit
+	  	INVOKE DefWindowProc, hWnd, localMsg, wParam, lParam
+	  	jmp WinProcExit
 	.ENDIF
 
-	
 WinProcExit:
 	ret
 WinProc ENDP
 
 
 
+
 PlayNote PROC fname:DWORD
 	; 
-	call writeInt
 	mov eax, SND_FILENAME
 	or eax, SND_ASYNC
 	invoke PlaySound, fname, 0, eax
@@ -393,18 +459,13 @@ PlayNote PROC fname:DWORD
 PlayNote ENDP
 
 
-
-
-
-
-
 ;---------------------------------------------------
 ErrorHandler PROC
 ; Display the appropriate system error message.
 ;---------------------------------------------------
 	.data
-		pErrorMsg  DWORD ?		; ptr to error message
-		messageID  DWORD ?
+	pErrorMsg  DWORD ?		; ptr to error message
+	messageID  DWORD ?
 	.code
 		INVOKE GetLastError	; Returns message ID in EAX
 		mov messageID,eax
@@ -422,5 +483,7 @@ ErrorHandler PROC
 		INVOKE LocalFree, pErrorMsg
 		ret
 ErrorHandler ENDP
+
+
 
 END
