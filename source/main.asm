@@ -144,7 +144,7 @@ WinProc PROC,
 	LOCAL hBrush:DWORD  ; Hold a brush for drawing a filled rectangle
 	
 	mov eax, localMsg
-; GET KEYBOARD INPUT HERE
+	; GET KEYBOARD INPUT HERE
 	.IF eax == WM_KEYDOWN
 		call WriteInt
 		.IF wParam == 41h		;key a = c note
@@ -247,34 +247,52 @@ WinProc PROC,
 		; The RGB value is needed to set the color of the brush
 		xor ebx, ebx  ; Clear out ebx
 						; ebx = { 0, 0, 0,  0 }
-		mov bl, 150   ; This will be the blue color
+		mov bl, 255;150   ; This will be the blue color
 					; ebx = { 0, 0, 0, 150 }
 		shl ebx, 8    ; Make room in ebx to add the green
 					; ebx = { 0, 0, 150, 0 }
-		mov bl, 100   ; This sets the green color
+		mov bl, 255;100   ; This sets the green color
 					; ebx = { 0, 0, 150, 100 }
 		shl ebx, 8    ; Make room for the red color'
 					; ebx = { 0,150, 100, 0 }  
-		mov bl, 50    ; This sets the red color
+		mov bl, 255;50    ; This sets the red color
 					; ebx = { 0,150, 100, 50 } 
-	  		  	 
-	  		  	 
 		INVOKE CreateSolidBrush, ebx
-		
 		mov hBrush, eax  ; Mov the brush handle into hBrush
-		
 		INVOKE SelectObject, hdc, hBrush
 		
-		INVOKE Rectangle, hdc, 10, 10, 90, 40
+		INVOKE Rectangle, hdc, 300, 100, 400, 400 ;c
+		INVOKE Rectangle, hdc, 400, 100, 500, 400 ;d
+		INVOKE Rectangle, hdc, 500, 100, 600, 400 ;e
+		INVOKE Rectangle, hdc, 600, 100, 700, 400 ;f
+		INVOKE Rectangle, hdc, 700, 100, 800, 400 ;g
+		INVOKE Rectangle, hdc, 800, 100, 900, 400 ;a
+		INVOKE Rectangle, hdc, 900, 100, 1000, 400 ;b
+
+		xor ebx, ebx  ; Clear out ebx
+		mov bl, 50;150   ; This will be the blue color
+		shl ebx, 8    ; Make room in ebx to add the green
+		mov bl, 50;100   ; This sets the green color
+		shl ebx, 8    ; Make room for the red color'
+		mov bl, 50;50    ; This sets the red color
+		INVOKE CreateSolidBrush, ebx
+		mov hBrush, eax  ; Mov the brush handle into hBrush
+		INVOKE SelectObject, hdc, hBrush
+
+		INVOKE Rectangle, hdc, 375, 100, 425, 300 ;c#
+		INVOKE Rectangle, hdc, 475, 100, 525, 300 ;d#
+		INVOKE Rectangle, hdc, 675, 100, 725, 300 ;f#
+		INVOKE Rectangle, hdc, 775, 100, 825, 300 ;g#
+		INVOKE Rectangle, hdc, 875, 100, 925, 300 ;a#
 		
 		
-		INVOKE MoveToEx, hdc, 0, 0, 0
-		INVOKE LineTo, hdc, 200, 200
-		INVOKE LineTo, hdc, 200, 0
-		INVOKE LineTo, hdc, 0,   200
-		INVOKE LineTo, hdc, 0,   0
-		INVOKE DrawTextA, hdc, ADDR str1, -1, ADDR rc, DTFLAGS 
-		INVOKE EndPaint, hWnd, ADDR ps
+		; INVOKE MoveToEx, hdc, 0, 0, 0
+		; INVOKE LineTo, hdc, 200, 200
+		; INVOKE LineTo, hdc, 200, 0
+		; INVOKE LineTo, hdc, 0,   200
+		; INVOKE LineTo, hdc, 0,   0
+		; INVOKE DrawTextA, hdc, ADDR str1, -1, ADDR rc, DTFLAGS 
+		; INVOKE EndPaint, hWnd, ADDR ps
 		jmp WinProcExit
 	.ELSE		; other message?
 		INVOKE DefWindowProc, hWnd, localMsg, wParam, lParam
