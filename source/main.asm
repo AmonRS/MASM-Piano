@@ -4,6 +4,7 @@ TITLE MASM Piano
 ; A virtual piano that you can play with the keyboard.
 
 ; keyboard key codes : https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
+; irvine32 help : http://programming.msjc.edu/asm/help/index.html
 
 
 
@@ -145,8 +146,6 @@ Message_Loop:
 	; Get next message from the queue.
 	INVOKE GetMessage, ADDR msg, NULL,NULL,NULL
 
-	; GET KEYBOARD INPUT HERE ?
-
 	; Quit if no more messages.
 	.IF eax == 0
 	  jmp Exit_Program
@@ -172,10 +171,9 @@ WinProc PROC,
 	mov eax, localMsg
 	
 	.IF eax == WM_LBUTTONDOWN		; mouse button?
-		;   INVOKE MessageBox, hWnd, ADDR PopupText,
-		;     ADDR PopupTitle, MB_OK
-		;   jmp WinProcExit
+		; don't do anything
 	.ENDIF
+
 	; GET KEYBOARD INPUT HERE
 	.IF eax == WM_KEYDOWN
 		mov ebx, 1
@@ -357,81 +355,115 @@ WinProc PROC,
 		INVOKE BeginPaint, hWnd, ADDR ps  
 	  	mov hdc, eax
 
-		; DRAW THE PIANO KEYS (rectangles) -----------------------------------------------------------------------------------------------------------
+		; DRAW THE PIANO KEYS (rectangles) -------------------------------------------------------------------------------------------------------------------------
 		
-		; Create an RGB value in ebx  32 BITS: { BLANK, BLUE, GREEN,  RED }; each of the four values is one byte; The RGB value is needed to set the color of the brush
-		xor ebx, ebx  					; Clear out ebx								; ebx = { 0, 0, 0,  0 }
-		mov bl, 255						;150   ; This will be the blue color		; ebx = { 0, 0, 0, 150 }
-		shl ebx, 8    					; Make room in ebx to add the green			; ebx = { 0, 0, 150, 0 }
-		mov bl, 255						;100   ; This sets the green color			; ebx = { 0, 0, 150, 100 }
-		shl ebx, 8    					; Make room for the red color'				; ebx = { 0,150, 100, 0 }  
-		mov bl, 255						;50    ; This sets the red color			; ebx = { 0,150, 100, 50 } 
-		INVOKE CreateSolidBrush, ebx
-		mov hBrush, eax  				; Mov the brush handle into hBrush
-		INVOKE SelectObject, hdc, hBrush
-		
-		; DRAW WHITE KEYS
-		INVOKE Rectangle, hdc, 300, 100, 400, 450 		;c
-		.IF c3_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 300, 425, 400, 450
-		.ENDIF
+			; CHANGE BRUSH COLOR TO WHITE
+			; Create an RGB value in ebx  32 BITS: { BLANK, BLUE, GREEN,  RED }; each of the four values is one byte; The RGB value is needed to set the color of the brush
+			xor ebx, ebx  					; Clear out ebx								; ebx = { 0, 0, 0,  0 }
+			mov bl, 255						;150   ; This will be the blue color		; ebx = { 0, 0, 0, 150 }
+			shl ebx, 8    					; Make room in ebx to add the green			; ebx = { 0, 0, 150, 0 }
+			mov bl, 255						;100   ; This sets the green color			; ebx = { 0, 0, 150, 100 }
+			shl ebx, 8    					; Make room for the red color'				; ebx = { 0,150, 100, 0 }  
+			mov bl, 255						;50    ; This sets the red color			; ebx = { 0,150, 100, 50 } 
+			INVOKE CreateSolidBrush, ebx
+			mov hBrush, eax  				; Mov the brush handle into hBrush
+			INVOKE SelectObject, hdc, hBrush
+			
+			; DRAW WHITE KEYS
+			INVOKE Rectangle, hdc, 300, 100, 400, 450 		;c
+			.IF c3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 300, 425, 400, 450
+			.ENDIF
+			INVOKE Rectangle, hdc, 400, 100, 500, 450 		;d
+			.IF d3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 400, 425, 500, 450
+			.ENDIF
+			INVOKE Rectangle, hdc, 500, 100, 600, 450 		;e
+			.IF e3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 500, 425, 600, 450
+			.ENDIF
+			INVOKE Rectangle, hdc, 600, 100, 700, 450 		;f
+			.IF f3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 600, 425, 700, 450
+			.ENDIF
+			INVOKE Rectangle, hdc, 700, 100, 800, 450 		;g
+			.IF g3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 700, 425, 800, 450
+			.ENDIF
+			INVOKE Rectangle, hdc, 800, 100, 900, 450 		;a
+			.IF a3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 800, 425, 900, 450
+			.ENDIF
+			INVOKE Rectangle, hdc, 900, 100, 1000, 450 		;b
+			.IF b3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 900, 425, 1000, 450
+			.ENDIF
+			INVOKE Rectangle, hdc, 1000, 100, 1100, 450 	;c4
+			.IF c4_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 1000, 425, 1100, 450
+			.ENDIF
 
-		INVOKE Rectangle, hdc, 400, 100, 500, 450 		;d
-		.IF d3_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 400, 425, 500, 450
-		.ENDIF
+			; CHANGE BRUSH COLOR TO BLACK
+			xor ebx, ebx  			; Clear ebx
+			mov bl, 50				; blue color
+			shl ebx, 8    			; Make room in ebx to add the green
+			mov bl, 50				; green color
+			shl ebx, 8    			; Make room for the red color'
+			mov bl, 50				; red color
+			INVOKE CreateSolidBrush, ebx
+			mov hBrush, eax  		; Mov the brush handle into hBrush
+			INVOKE SelectObject, hdc, hBrush
 
-		INVOKE Rectangle, hdc, 500, 100, 600, 450 		;e
-		.IF e3_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 500, 425, 600, 450
-		.ENDIF
+			; DRAW BLACK KEYS
+			INVOKE Rectangle, hdc, 375, 100, 425, 300 		;c#
+			INVOKE Rectangle, hdc, 475, 100, 525, 300 		;d#
+			INVOKE Rectangle, hdc, 675, 100, 725, 300 		;f#
+			INVOKE Rectangle, hdc, 775, 100, 825, 300 		;g#
+			INVOKE Rectangle, hdc, 875, 100, 925, 300 		;a#
 
-		INVOKE Rectangle, hdc, 600, 100, 700, 450 		;f
-		.IF f3_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 600, 425, 700, 450
-		.ENDIF
+			; BLACK KEY HIGHLIGHTS
+			xor ebx, ebx  			; Clear ebx
+			mov bl, 80				; blue color
+			shl ebx, 8    			; Make room in ebx to add the green
+			mov bl, 80				; green color
+			shl ebx, 8    			; Make room for the red color'
+			mov bl, 80				; red color
+			INVOKE CreateSolidBrush, ebx
+			mov hBrush, eax  		; Mov the brush handle into hBrush
+			INVOKE SelectObject, hdc, hBrush
+			.IF cs3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 375, 290, 425, 300
+			.ENDIF
+			.IF ds3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 475, 290, 525, 300
+			.ENDIF
+			.IF fs3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 675, 290, 725, 300
+			.ENDIF
+			.IF gs3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 775, 290, 825, 300
+			.ENDIF
+			.IF as3_keystat == 0
+				call writeInt
+				INVOKE Rectangle, hdc, 875, 290, 925, 300
+			.ENDIF
 
-		INVOKE Rectangle, hdc, 700, 100, 800, 450 		;g
-		.IF g3_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 700, 425, 800, 450
-		.ENDIF
-		INVOKE Rectangle, hdc, 800, 100, 900, 450 		;a
-		.IF a3_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 800, 425, 900, 450
-		.ENDIF
-		INVOKE Rectangle, hdc, 900, 100, 1000, 450 		;b
-		.IF b3_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 900, 425, 1000, 450
-		.ENDIF
-		INVOKE Rectangle, hdc, 1000, 100, 1100, 450 	;c4
-		.IF c4_keystat == 0
-			call writeInt
-			INVOKE Rectangle, hdc, 1000, 425, 1100, 450
-		.ENDIF
 
-		xor ebx, ebx  			; Clear ebx
-		mov bl, 50				; blue color
-		shl ebx, 8    			; Make room in ebx to add the green
-		mov bl, 50				; green color
-		shl ebx, 8    			; Make room for the red color'
-		mov bl, 50				; red color
-		INVOKE CreateSolidBrush, ebx
-		mov hBrush, eax  		; Mov the brush handle into hBrush
-		INVOKE SelectObject, hdc, hBrush
 
-		; DRAW BLACK KEYS
-		INVOKE Rectangle, hdc, 375, 100, 425, 300 		;c#
-		INVOKE Rectangle, hdc, 475, 100, 525, 300 		;d#
-		INVOKE Rectangle, hdc, 675, 100, 725, 300 		;f#
-		INVOKE Rectangle, hdc, 775, 100, 825, 300 		;g#
-		INVOKE Rectangle, hdc, 875, 100, 925, 300 		;a#
+		mov eax, 50
+		call Delay
 
 	  	; ; output text
 	  	; INVOKE DrawTextA, hdc, ADDR HelloStr, -1, ADDR rc, DTFLAGS 
