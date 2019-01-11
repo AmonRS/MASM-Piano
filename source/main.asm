@@ -51,7 +51,8 @@ DTFLAGS = 25h  ; Needed for drawtext
 
 	; FILE PATHS FOR SOUND FILES
 		;SFPATH TEXTEQU <"C:\Users\atran19\MASM-Piano\source\">
-		SFPATH TEXTEQU <"Z:\CS-278-1\MASM-Piano\source\">
+		;SFPATH TEXTEQU <"Z:\CS-278-1\MASM-Piano\source\">
+		SFPATH TEXTEQU <"D:\MASM-Piano\source\">
 
 		c3 BYTE SFPATH,"C3ff.wav",0
 		cs3 BYTE SFPATH,"Cs3ff.wav",0
